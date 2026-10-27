@@ -1,0 +1,1 @@
+INSERT INTO public.app_settings (key, value) VALUES ('kyc_hold_amount_kes', '100') ON CONFLICT (key) DO NOTHING;
