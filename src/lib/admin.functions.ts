@@ -796,7 +796,7 @@ export const getIntegrationSettings = createServerFn({ method: "GET" })
     return {
       secretKeyPreview: maskSecret(secret),
       webhookSecretPreview: maskSecret(webhook),
-      baseUrl: base ?? "https://josina.app/api/v1",
+      baseUrl: base ?? "https://ghopay.app/api/v1",
       appPublicUrl: normalizedAppUrl,
       callbackUrl: (await webhookUrl()) ?? "",
       configured: Boolean(secret),
@@ -823,16 +823,11 @@ export const updateIntegrationSettings = createServerFn({ method: "POST" })
     const webhookSecret = data.webhookSecret?.trim();
     const appPublicUrl = data.appPublicUrl?.trim();
 
-    if (secretKey && !/^sk_(live|test)_/.test(secretKey)) {
+    // Aceita qualquer formato de chave API de qualquer plataforma (pv_live_, sk_live_, pk_live_, etc.)
+    if (secretKey && secretKey.length < 3) {
       return {
         ok: false as const,
-        message: "That is not a Smoo Pay secret key. It must start with sk_live_ or sk_test_.",
-      };
-    }
-    if (webhookSecret && /^https?:\/\//i.test(webhookSecret)) {
-      return {
-        ok: false as const,
-        message: "This is a URL. Paste the Webhook Secret from your Smoo Pay dashboard here instead.",
+        message: "A chave de API informada é muito curta ou inválida.",
       };
     }
     if (appPublicUrl) {

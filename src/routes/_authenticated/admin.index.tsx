@@ -2975,64 +2975,64 @@ function IntegrationsCard() {
     <Card className="shadow-soft">
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2 font-display">
-          <CreditCard className="size-5 text-primary" /> Payments (Smoo Pay)
+          <CreditCard className="size-5 text-primary" /> Gateway de Pagamento
           <Badge variant={data.configured ? "secondary" : "destructive"}>
-            {data.configured ? "API key set" : "Not configured"}
+            {data.configured ? "Chave API Ativa" : "Não configurado"}
           </Badge>
           <Badge variant={data.webhookConfigured ? "secondary" : "outline"}>
-            {data.webhookConfigured ? "Webhook secret set" : "Webhook secret missing"}
+            {data.webhookConfigured ? "Webhook ativo" : "Webhook não configurado"}
           </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <section className="space-y-4">
-          <h4 className="text-sm font-semibold">Smoo Pay keys</h4>
+          <h4 className="text-sm font-semibold">Credenciais da Plataforma de Pagamentos</h4>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="smoo-secret">Secret API key</Label>
+              <Label htmlFor="smoo-secret">Secret API Key (Chave Secreta)</Label>
               <Input
                 id="smoo-secret"
                 type="password"
                 autoComplete="off"
-                placeholder={data.secretKeyPreview || "sk_live_..."}
+                placeholder={data.secretKeyPreview || "pv_live_... / sk_live_..."}
                 value={secretKey}
                 onChange={(event) => setSecretKey(event.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                From the Smoo Pay dashboard → API key. Starts with sk_live_ or sk_test_. Leave empty
-                to keep the current key{data.secretKeyPreview ? ` (${data.secretKeyPreview})` : ""}.
+                Chave de API da sua plataforma (aceita qualquer gateway: Ghost Pay, Payvibe, Paystack, Smoo, etc.). Deixe vazio
+                para manter a chave atual{data.secretKeyPreview ? ` (${data.secretKeyPreview})` : ""}.
               </p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="smoo-base">API base URL</Label>
+              <Label htmlFor="smoo-base">API Base URL (URL da API)</Label>
               <Input
                 id="smoo-base"
                 value={baseUrl}
+                placeholder="https://ghopay.app/api/v1"
                 onChange={(event) => setBaseUrl(event.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Keep https://josina.app/api/v1 unless Smoo Pay tells you otherwise.
+                URL base para criação de cobranças da sua plataforma (ex: https://ghopay.app/api/v1 ou a URL da sua API).
               </p>
             </div>
           </div>
         </section>
 
         <section className="space-y-4">
-          <h4 className="text-sm font-semibold">Webhook</h4>
+          <h4 className="text-sm font-semibold">Webhook & Notificações</h4>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="smoo-webhook">Webhook secret</Label>
+              <Label htmlFor="smoo-webhook">Webhook Secret / Chave do Webhook</Label>
               <Input
                 id="smoo-webhook"
                 type="password"
                 autoComplete="off"
-                placeholder={data.webhookSecretPreview || "paste the same value as in Smoo Pay"}
+                placeholder={data.webhookSecretPreview || "Cole o segredo do webhook"}
                 value={webhookSecret}
                 onChange={(event) => setWebhookSecret(event.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Copy the Webhook Secret from the Smoo Pay dashboard — the exact same value must be in
-                both places. Never paste a URL here.
+                Código secreto ou token de webhook da sua plataforma para validação de pagamentos.
               </p>
             </div>
             <div className="space-y-1.5">
