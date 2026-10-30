@@ -204,7 +204,10 @@ export function VeriflowKycDialog({
       let resolvedUserId = userId;
       if (!resolvedUserId) {
         const { data: authData } = await supabase.auth.getUser();
-        resolvedUserId = authData.user?.id || "panelist";
+        resolvedUserId = authData.user?.id;
+      }
+      if (!resolvedUserId) {
+        throw new Error("Sessão de usuário não identificada. Por favor, faça login novamente.");
       }
 
       // Upload all real files to Supabase Storage under 'kyc' bucket
@@ -227,17 +230,27 @@ export function VeriflowKycDialog({
       for (const [key, fieldName] of fileEntries) {
         const file = files[key];
         if (!file) continue;
-        const ext = file.name.split(".").pop() ?? "jpg";
         const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
         const path = `${resolvedUserId}/${Date.now()}-${key}-${cleanName}`;
         const { error: uploadError } = await supabase.storage.from("kyc").upload(path, file, {
           upsert: true,
+          contentType: file.type || "application/octet-stream",
         });
         if (uploadError) {
-          console.warn("Storage upload error for", key, uploadError);
-        } else {
-          uploadedPaths[fieldName] = path;
+          console.error("Storage upload error for", key, uploadError);
+          throw new Error(`Falha no upload do arquivo (${file.name}): ${uploadError.message || "Erro no servidor"}`);
         }
+        uploadedPaths[fieldName] = path;
+      }
+
+      if (
+        !uploadedPaths.idFrontPath ||
+        !uploadedPaths.idBackPath ||
+        !uploadedPaths.selfiePath ||
+        !uploadedPaths.proofAddressPath ||
+        !uploadedPaths.bankLetterPath
+      ) {
+        throw new Error("Um ou mais documentos falharam no envio. Por favor, tente novamente.");
       }
 
       const now = new Date();
