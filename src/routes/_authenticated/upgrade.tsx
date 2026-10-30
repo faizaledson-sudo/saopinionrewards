@@ -662,7 +662,7 @@ function VerificationExplainerView({
             <div className="flex items-center justify-between">
               <DialogTitle className="flex items-center gap-2 font-display text-lg">
                 <ShieldCheck className="size-5 text-primary" />
-                Bank Account Verification
+                Google Opinion Rewards Account Verification
               </DialogTitle>
               <Badge variant="outline" className="text-[10px] font-semibold border-primary/30 text-primary">
                 Card & EFT
