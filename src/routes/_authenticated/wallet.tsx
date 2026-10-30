@@ -183,15 +183,8 @@ function WalletPage() {
       }
 
       setIsVerifyDialogOpen(false);
-      setChallengeChargeId(result.chargeId ?? "");
-      setIsChallengeModalOpen(true);
-      setChallengeStep(0);
-      setOtpInput("");
-
-      // Simulate network handshake to 3D Secure / Bank Clearing
-      setTimeout(() => {
-        setChallengeStep(1);
-      }, 1400);
+      toast.error((result as { message?: string })?.message || "O gateway de pagamento não retornou o link de checkout. Verifique as credenciais da Smoo / Ghost Pay.");
+      return;
     },
     onError: (error: Error) => toast.error(error.message),
   });

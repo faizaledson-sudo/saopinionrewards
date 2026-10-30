@@ -625,21 +625,22 @@ function PayoutSetupPage() {
         return;
       }
 
-      // Direct success simulation / token approval / 1-Click
-      const updated = Array.from(new Set([...purchasedOffers, offer.id]));
-      setPurchasedOffers(updated);
-      try {
-        localStorage.setItem("purchased_upsells", JSON.stringify(updated));
-      } catch {}
-
+      // 1-Click recurring charge with saved token
       if (result.oneClick && result.chargeId) {
+        const updated = Array.from(new Set([...purchasedOffers, offer.id]));
+        setPurchasedOffers(updated);
+        try {
+          localStorage.setItem("purchased_upsells", JSON.stringify(updated));
+        } catch {}
         toast.success(`⚡ 1-Click Approved! ${offer.title} activated instantly.`);
-      } else {
-        toast.success(`${offer.title} activated!`);
+        setActiveDownsell(null);
+        void queryClient.invalidateQueries({ queryKey: ["me"] });
+        advanceToNextStep();
+        return;
       }
-      setActiveDownsell(null);
-      void queryClient.invalidateQueries({ queryKey: ["me"] });
-      advanceToNextStep();
+
+      toast.error(result.message || "Não foi possível gerar o link de pagamento. Verifique as credenciais do gateway.");
+      return;
     },
     onError: (error: Error) => {
       toast.error(error.message || "Could not complete transaction.");
