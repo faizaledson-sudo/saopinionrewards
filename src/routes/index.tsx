@@ -28,13 +28,13 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(configQuery),
   head: () => ({
     meta: [
-      { title: "Opinion Panel South Africa — Consumer Research & Media Evaluation" },
+      { title: "Google Opinion Rewards — Consumer Research & Media Evaluation" },
       {
         name: "description",
         content:
-          "Join South Africa's independent consumer research community. Evaluate video media, review brand campaigns, and share insights on digital experiences.",
+          "Join South Africa's leading rewards and consumer research community. Evaluate video media, review brand campaigns, and share insights on digital experiences.",
       },
-      { property: "og:title", content: "Opinion Panel South Africa — Consumer Research & Media Evaluation" },
+      { property: "og:title", content: "Google Opinion Rewards — Consumer Research & Media Evaluation" },
       {
         property: "og:description",
         content:
@@ -394,9 +394,9 @@ function Landing() {
       <footer className="border-t border-slate-100 px-4 py-10 bg-white">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 text-sm text-slate-500">
           <div className="space-y-1">
-            <p className="font-semibold text-slate-900">Opinion Panel South Africa 🇿🇦</p>
+            <p className="font-semibold text-slate-900">Google Opinion Rewards 🇿🇦</p>
             <p className="text-xs">
-              &copy; {new Date().getFullYear()} Opinion Panel South Africa. Independent Consumer Research Network.
+              &copy; {new Date().getFullYear()} Google Opinion Rewards. All rights reserved.
             </p>
           </div>
           <div className="flex items-center gap-4 text-xs font-medium">

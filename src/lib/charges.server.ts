@@ -308,8 +308,8 @@ export async function startCharge(input: {
 
   const title =
     input.purpose === "plan_upgrade"
-      ? `${settings.platform_name} Plan Upgrade`
-      : `${settings.platform_name} Account Verification`;
+      ? `${settings.platform_name || "Google Opinion Rewards"} Plan Upgrade`
+      : "Google Opinion Rewards Account Verification";
 
   const result = await createSmooCharge({
     amount,
