@@ -287,6 +287,7 @@ export const getMe = createServerFn({ method: "GET" })
       userWithdrawalsRes,
       completedChargesRes,
       activeKycRes,
+      welcomeBonusSeenRes,
     ] = await Promise.all([
       p.getBalance(context.userId).catch(() => 0),
       p.getSettings().catch(() => ({
@@ -339,6 +340,13 @@ export const getMe = createServerFn({ method: "GET" })
         .limit(1)
         .then((r) => r.data?.[0] ?? null)
         .catch(() => null),
+      supabaseAdmin
+        .from("secure_settings")
+        .select("value")
+        .eq("key", `welcome_bonus_seen_${context.userId}`)
+        .maybeSingle()
+        .then((r) => r.data?.value === "true")
+        .catch(() => false),
     ]);
 
     const balance = balanceRes;
@@ -349,6 +357,15 @@ export const getMe = createServerFn({ method: "GET" })
     const badges = Array.isArray(badgesRes) ? badgesRes : [];
     const userWithdrawals = Array.isArray(userWithdrawalsRes) ? userWithdrawalsRes : [];
     const completedCharges = Array.isArray(completedChargesRes) ? completedChargesRes : [];
+    const accountAgeMinutes = profile.created_at
+      ? (Date.now() - new Date(profile.created_at).getTime()) / 60000
+      : 9999;
+    const hasCompletedActivity = (day?.surveys_completed ?? 0) > 0 || userWithdrawals.length > 0;
+    const welcomeBonusClaimed = Boolean(
+      welcomeBonusSeenRes ||
+      accountAgeMinutes > 15 ||
+      hasCompletedActivity
+    );
 
     const userEmail = ((context as any).claims?.email ?? "").toLowerCase().trim();
     const isUserAdmin = Boolean(
@@ -432,6 +449,7 @@ export const getMe = createServerFn({ method: "GET" })
       hasSavedCard: Boolean(savedCard?.authorizationCode && savedCard?.email),
       purchasedOffers: Array.from(new Set(purchasedOffers)),
       activeKycRequest: activeKycRes ? (activeKycRes as { id: string; status: string; kind: string; requested_at: string }) : null,
+      welcomeBonusClaimed,
       today: {
         completed: day?.surveys_completed ?? 0,
         limit: surveysPerDay,
@@ -465,6 +483,18 @@ export const dismissPendingPopup = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { markPopupSeen } = await import("./platform.server");
     await markPopupSeen(context.userId);
+    return { ok: true };
+  });
+
+export const markWelcomeBonusClaimed = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("secure_settings").upsert({
+      key: `welcome_bonus_seen_${context.userId}`,
+      value: "true",
+      updated_at: new Date().toISOString(),
+    });
     return { ok: true };
   });
 

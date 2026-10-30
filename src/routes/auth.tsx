@@ -144,6 +144,10 @@ function AuthPage() {
           return;
         }
 
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("is_first_session_after_register", "true");
+        }
+
         trackEvent("CompleteRegistration", {
           content_name: "signup",
           status: true,
@@ -181,6 +185,14 @@ function AuthPage() {
         if (authResult.error) {
           toast.error(authResult.error.message || "Invalid login credentials. Please check your email and password.");
           return;
+        }
+
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("is_first_session_after_register");
+          const loggedUserId = authResult.data?.user?.id;
+          if (loggedUserId) {
+            localStorage.setItem(`welcome_bonus_claimed_${loggedUserId}`, "true");
+          }
         }
         trackEvent("Login");
       }

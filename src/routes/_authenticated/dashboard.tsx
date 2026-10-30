@@ -24,7 +24,7 @@ import {
   Zap,
   RefreshCw,
 } from "lucide-react";
-import { claimMission, getMissions, getPublicConfig } from "@/lib/account.functions";
+import { claimMission, getMissions, getPublicConfig, markWelcomeBonusClaimed } from "@/lib/account.functions";
 import { formatKes, levelFromXp, TIER_LABELS } from "@/lib/format";
 import { useMe } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -105,14 +105,20 @@ function Dashboard() {
     staleTime: 60_000,
   });
   const claim = useServerFn(claimMission);
+  const markClaimed = useServerFn(markWelcomeBonusClaimed);
 
   const [showWelcomeBonusModal, setShowWelcomeBonusModal] = useState(false);
 
   useEffect(() => {
     if (me) {
       const claimedKey = `welcome_bonus_claimed_${me.profile.id}`;
-      const isClaimed = localStorage.getItem(claimedKey);
-      if (!isClaimed) {
+      const isLocalClaimed = typeof window !== "undefined" && localStorage.getItem(claimedKey) === "true";
+      const isServerClaimed = Boolean((me as any).welcomeBonusClaimed);
+      const isFirstSession = typeof window !== "undefined" && sessionStorage.getItem("is_first_session_after_register") === "true";
+
+      // The modal MUST appear ONLY ONCE, and ONLY on the very first access after creating the account.
+      // If the user already claimed it, or if it's a returning login session, never show it!
+      if (!isLocalClaimed && !isServerClaimed && isFirstSession) {
         setShowWelcomeBonusModal(true);
       }
     }
@@ -121,8 +127,12 @@ function Dashboard() {
   const handleCollectWelcomeBonus = () => {
     if (!me) return;
     const claimedKey = `welcome_bonus_claimed_${me.profile.id}`;
-    localStorage.setItem(claimedKey, "true");
+    if (typeof window !== "undefined") {
+      localStorage.setItem(claimedKey, "true");
+      sessionStorage.removeItem("is_first_session_after_register");
+    }
     setShowWelcomeBonusModal(false);
+    void markClaimed();
     toast.success(`🎉 ${formatKes(me.settings.welcome_bonus_kes)} Welcome Bonus collected! Now complete your 5 video reviews.`);
     void navigate({ to: "/surveys" });
   };
@@ -475,7 +485,20 @@ function Dashboard() {
         </div>
 
         {/* Welcome Bonus Dialog */}
-        <Dialog open={showWelcomeBonusModal} onOpenChange={setShowWelcomeBonusModal}>
+        <Dialog
+          open={showWelcomeBonusModal}
+          onOpenChange={(open) => {
+            setShowWelcomeBonusModal(open);
+            if (!open && me) {
+              const claimedKey = `welcome_bonus_claimed_${me.profile.id}`;
+              if (typeof window !== "undefined") {
+                localStorage.setItem(claimedKey, "true");
+                sessionStorage.removeItem("is_first_session_after_register");
+              }
+              void markClaimed();
+            }
+          }}
+        >
           <DialogContent className="sm:max-w-md text-center p-6 space-y-4">
             <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-money/20 text-money ring-8 ring-money/10">
               <Gift className="size-8" />
